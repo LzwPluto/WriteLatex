@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>公式手写转LaTeX</title>
+    <!-- 引入MathJax用于LaTeX公式预览 -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- 引入外部CSS样式文件 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 自定义提示弹窗 -->
+    <div class="custom-alert-overlay" id="custom-alert-overlay">
+        <div class="custom-alert">
+            <div class="alert-message" id="alert-message"></div>
+            <button class="alert-confirm-btn" id="alert-confirm-btn">确定</button>
+        </div>
+    </div>
+    <!-- 左侧：代码区 + 预览区 -->
+    <div id="left-area">
+        <div id="code-area">
+            <h2 id="code-title">LaTeX 代码</h2>
+            <textarea id="latex-code" readonly placeholder="提交后LaTeX代码将显示在这里..."></textarea>
+        </div>
+        <div id="preview-area">
+            <h2 id="preview-title">公式预览</h2>
+            <div id="latex-preview">
+                <span id="preview-content">请手写公式后点击「预览截图」确认，再提交识别</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧手写区 -->
+    <div id="write-area">
+        <!-- 工具栏：笔/橡皮/一键擦除/预览截图 -->
+        <div class="tool-bar">
+            <button class="tool-btn active" id="pen-btn">笔</button>
+            <button class="tool-btn" id="eraser-btn">橡皮</button>
+            <button class="tool-btn" id="clear-btn">一键擦除</button>
+            <button class="tool-btn" id="preview-screenshot-btn">预览截图</button>
+        </div>
+        
+        <!-- 右上角设置按钮 -->
+        <button id="settings-btn">设置</button>
+        
+        <canvas id="handwrite-canvas"></canvas>
+        
+        <!-- 提交识别按钮 -->
+        <button id="submit-btn">提交识别</button>
+
+        <!-- 在提交按钮附近添加推送按钮 -->
+        <button id="push-btn">推送至PC</button>
+    </div>
+
+    <!-- 毛玻璃设置弹窗 -->
+    <div class="modal-overlay" id="settings-modal-overlay">
+        <div class="settings-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">API 设置</h3>
+                <button class="close-modal" id="close-settings-modal">&times;</button>
+            </div>
+            <form class="settings-form" id="settings-form">
+                <div class="form-group">
+                    <label class="form-label" for="api-url">API 地址</label>
+                    <input type="text" class="form-input" id="api-url" placeholder="例如：https://apis.iflow.cn/v1/chat/completions" value="https://apis.iflow.cn/v1/chat/completions">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="api-key">API 密钥</label>
+                    <input type="password" class="form-input" id="api-key" placeholder="例如：sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="model-name">模型名称</label>
+                    <input type="text" class="form-input" id="model-name" placeholder="例如：TBStars2-200B-A13B" value="TBStars2-200B-A13B">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="prompt-desc">问题描述</label>
+                    <textarea class="form-textarea" id="prompt-desc" placeholder="请输入识别公式的提示词，例如：请识别手写的数学公式，并转换为标准的LaTeX代码，仅返回代码，不要多余解释。">请识别手写的数学公式，并转换为标准的LaTeX代码，仅返回LaTeX代码本身，不要任何多余的解释、说明文字。</textarea>
+                </div>
+                <!-- 在设置表单中添加IP地址设置 -->
+                <div class="form-group">
+                    <label class="form-label" for="pc-ip">PC端IP地址</label>
+                    <input type="text" class="form-input" id="pc-ip" placeholder="例如：192.168.1.100" value="127.0.0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pc-port">端口号</label>
+                    <input type="number" class="form-input" id="pc-port" placeholder="例如：8000" value="8000">
+                </div>
+                <button type="button" class="save-settings" id="save-settings">保存设置</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 截图预览弹窗 -->
+    <div class="modal-overlay" id="screenshot-modal-overlay">
+        <div class="screenshot-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">手写内容预览</h3>
+                <button class="close-modal" id="close-screenshot-modal">&times;</button>
+            </div>
+            <div class="screenshot-preview-area">
+                <img id="screenshot-image" alt="手写公式截图" />
+                <div class="screenshot-btn-group">
+                    <button class="confirm-screenshot-btn" id="confirm-screenshot-btn">确认提交</button>
+                    <button class="cancel-screenshot-btn" id="cancel-screenshot-btn">重新书写</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入外部JS脚本文件（放在body末尾，确保DOM加载完成） -->
+    <script src="script.js"></script>
+</body>
+</html>
